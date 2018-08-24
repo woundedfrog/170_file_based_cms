@@ -8,6 +8,7 @@ GEM
       tzinfo (~> 1.1)
     backports (3.11.3)
     concurrent-ruby (1.0.5)
+    erubis (2.7.0)
     i18n (1.1.0)
       concurrent-ruby (~> 1.0)
     minitest (5.11.3)
@@ -38,6 +39,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  erubis
   sinatra
   sinatra-contrib
 
