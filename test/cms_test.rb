@@ -17,5 +17,13 @@ class CMSTest < Minitest::Test
     assert_equal 200, last_response.status
     assert_equal "text/html;charset=utf-8", last_response["Content-Type"]
     assert_includes last_response.body, "about.txt"
+    assert_includes last_response.body, "changes.txt"
+    assert_includes last_response.body, "history.txt"
   end
+
+  def test_fetch_document_list
+    get "/changes.txt"
+    assert_includes last_response.body, "There were so many changes"
+  end
+
 end
