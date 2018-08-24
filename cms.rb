@@ -8,3 +8,10 @@ get "/" do
   @files = Dir.glob(root + "/data/*").map { |path| File.basename(path) }
   erb :index
 end
+
+get "/:file_name" do
+  path = root + "/data/" + params[:file_name]
+
+  headers["Content-type"] = "text/plain"
+  File.read(path)
+end
