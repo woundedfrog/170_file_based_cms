@@ -16,7 +16,7 @@ class CMSTest < Minitest::Test
     get "/"
     assert_equal 200, last_response.status
     assert_equal "text/html;charset=utf-8", last_response["Content-Type"]
-    assert_includes last_response.body, "about.txt"
+    assert_includes last_response.body, "about.md"
     assert_includes last_response.body, "changes.txt"
     assert_includes last_response.body, "history.txt"
   end
@@ -37,5 +37,13 @@ class CMSTest < Minitest::Test
 
     get "/"
     refute_includes last_response.body, "invalid_document.txt doesn't exist"
+  end
+
+  def test_markdown_documents
+    get "/about.md"
+
+    assert_equal 200, last_response.status
+    assert_equal "text/html;charset=utf-8", last_response["Content-Type"]
+    assert_includes last_response.body, "<h1>Text to HTML Markdown</h1>"
   end
 end
