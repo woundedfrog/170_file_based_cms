@@ -1,5 +1,6 @@
 ENV["RACK_ENV"] = "test"
 
+require "fileutils"
 require "minitest/autorun"
 require "rack/test"
 
@@ -10,6 +11,20 @@ class CMSTest < Minitest::Test
 
   def app
     Sinatra::Application
+  end
+
+  def setup
+    FileUtils.mkdir_p(data_path)
+
+    create_document "about.md", "#Text to be tested"
+    create_document "changes.txt", "So many changes were made that it's crazy"
+    create_document "history.txt"
+  end
+
+  def create_document(name, content = "")
+    File.open(File.join(data_path, name), "w") do |file|
+      file.write(content)
+    end
   end
 
   def test_index
@@ -38,13 +53,13 @@ class CMSTest < Minitest::Test
     get "/"
     refute_includes last_response.body, "invalid_document.txt doesn't exist"
   end
-
+  #
   def test_markdown_documents
     get "/about.md"
 
     assert_equal 200, last_response.status
     assert_equal "text/html;charset=utf-8", last_response["Content-Type"]
-    assert_includes last_response.body, "<h1>Text to HTML Markdown</h1>"
+    assert_includes last_response.body, "<h1>Text to be tested</h1>"
   end
 
   def test_document_editing
@@ -56,19 +71,20 @@ class CMSTest < Minitest::Test
   end
 
   def test_document_updates
-    get "/testing_text.txt"
-    original_contents = last_response.body
-
-    post "/testing_text.txt", content: original_contents + "Added content: content testing text"
+    post "/changes.txt", content: "content testing text"
 
     assert_equal 302, last_response.status
 
     get last_response["Location"]
 
-    assert_includes last_response.body, "testing_text.txt has been updated"
+    assert_includes last_response.body, "changes.txt has been updated"
 
-    get "/testing_text.txt"
+    get "/changes.txt"
     assert_equal 200, last_response.status
     assert_includes last_response.body, "content testing text"
+  end
+
+  def teardown
+    FileUtils.rm_rf(data_path)
   end
 end
