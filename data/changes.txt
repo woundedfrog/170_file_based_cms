@@ -1,2 +1,2 @@
-There were so many changes made.
-Too many to count, but the change I like the most and find the most useful is "fixnum#.digits" method.
+There were so many changes made. 
+Too many to count, but the change I like the most and find the most useful is "fixnum#.digits" method. 
