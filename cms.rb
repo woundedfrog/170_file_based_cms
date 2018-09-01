@@ -81,7 +81,7 @@ post "/:file_name" do
   redirect "/"
 end
 
-get "/:file_name/delete" do
+post "/:file_name/delete" do
   path = File.join(data_path, params[:file_name])
   File.delete(path)
   session[:message] = "#{params[:file_name]} has been deleted!"
