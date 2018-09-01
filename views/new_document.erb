@@ -1,0 +1,17 @@
+<% if session[:message] %>
+  <p class="message"><%= session.delete(:message) %></p>
+<% end %>
+
+<form method="post" action="/create">
+  <label for="file_name">Enter file name:</label>
+  <div>
+    <input name="filename" id="filename" type="text">
+    <!-- <textarea name="title_content" id="title_content" rows="1" cols="100"></textarea> -->
+  </div>
+  <label for="content">Enter file content:</label>
+  <div>
+    <textarea name="content" id="content" rows="20" cols="100"></textarea>
+  </div>
+  <button type="submit">Create</button>
+  <a href="/">Cancel</a>
+</form>

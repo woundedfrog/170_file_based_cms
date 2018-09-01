@@ -38,6 +38,25 @@ get "/" do
   erb :index
 end
 
+get "/new" do
+  erb :new_document
+end
+
+post "/create" do
+  title = params[:filename].to_s
+  file_content = params[:content].to_s
+  if !title.include?(".") || title.size == ''
+    session[:message] = "A valid file-name and type is required!"
+    status 422
+    erb :new_document
+  else
+    path = File.join(data_path, title)
+    File.write(path, file_content)
+    session[:message] = "#{title} has been created!"
+    redirect "/"
+  end
+end
+
 get "/:file_name" do
   path = File.join(data_path, params[:file_name])
   if File.file?(path)
