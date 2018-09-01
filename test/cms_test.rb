@@ -19,6 +19,7 @@ class CMSTest < Minitest::Test
     create_document "about.md", "#Text to be tested"
     create_document "changes.txt", "So many changes were made that it's crazy"
     create_document "history.txt"
+    create_document "test.txt"
   end
 
   def create_document(name, content = "")
@@ -107,6 +108,18 @@ class CMSTest < Minitest::Test
     post "/create", filename: ""
     assert_equal 422, last_response.status
     assert_includes last_response.body, "A valid file-name and type is required!"
+  end
+
+  def test_deleting_document
+    post "/test.txt/delete"
+
+    assert_equal 302, last_response.status
+
+    get last_response["Location"]
+    assert_includes last_response.body, "test.txt has been deleted"
+
+    get "/"
+    refute_includes last_response.body, "test.txt"
   end
 
   def teardown
