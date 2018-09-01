@@ -32,6 +32,17 @@ def display_file_content(path)
   end
 end
 
+def user_signed_in?
+  session.key?(:username)
+end
+
+def require_user_signin
+  if user_signed_in? == false
+    session[:message] = "You must be signed in to do that."
+    redirect "/"
+  end
+end
+
 get "/" do
   pattern = File.join(data_path, "*")
   @files = Dir.glob(pattern).map { |path| File.basename(path) }
@@ -39,12 +50,17 @@ get "/" do
 end
 
 get "/new" do
+  require_user_signin
+
   erb :new_document
 end
 
 post "/create" do
+  require_user_signin
+
   title = params[:filename].to_s
   file_content = params[:content].to_s
+
   if !title.include?(".") || title.size == ''
     session[:message] = "A valid file-name and type is required!"
     status 422
@@ -59,6 +75,7 @@ end
 
 get "/:file_name" do
   path = File.join(data_path, params[:file_name])
+
   if File.file?(path)
     display_file_content(path)
   else
@@ -68,22 +85,33 @@ get "/:file_name" do
 end
 
 get "/:file_name/edit" do
+  require_user_signin
+
   path = File.join(data_path, params[:file_name])
+
   @file_name = params[:file_name]
   @content = File.read(path)
   erb :edit
 end
 
 post "/:file_name" do
+  require_user_signin
+
   path = File.join(data_path, params[:file_name])
+
   File.write(path, params[:content])
+
   session[:message] = "#{params[:file_name]} has been updated!"
   redirect "/"
 end
 
 post "/:file_name/delete" do
+  require_user_signin
+
   path = File.join(data_path, params[:file_name])
+
   File.delete(path)
+
   session[:message] = "#{params[:file_name]} has been deleted!"
   redirect "/"
 end
@@ -95,8 +123,9 @@ end
 post "/users/signin" do
   username = params[:username] || ""
   password = params[:password]
+
   if username == 'admin' && password == 'secret'
-  session[:username] = username
+    session[:username] = username
     session[:message] = "Welcome!"
     redirect "/"
   else
