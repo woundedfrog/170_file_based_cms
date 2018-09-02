@@ -5,6 +5,8 @@ require "redcarpet"
 require "yaml"
 require "bcrypt"
 
+require 'fileutils'
+
 configure do
   enable :sessions
   set :session_secret, "secret"
@@ -66,7 +68,7 @@ def require_user_signin
 end
 
 def file_type_is_supported?(file)
-  [".rb", ".txt", ".md"].include?(File.extname(file))
+  [".rb", ".txt", ".md", ".jpg", ".png", ".gif"].include?(File.extname(file))
 end
 
 get "/" do
@@ -97,6 +99,15 @@ post "/create" do
     session[:message] = "#{title} has been created!"
     redirect "/"
   end
+end
+
+get "/new_image" do
+  require_user_signin
+  erb :upload
+end
+
+post "/upload/image" do
+  redirect "/"
 end
 
 get "/:file_name" do
