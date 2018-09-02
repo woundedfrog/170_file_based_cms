@@ -1,5 +1,5 @@
-{
-  mike: $2a$10$zajeXZ3EnviHVW.7Ak6.Vu1PnDV.1a6mqhU25/qrCWR7w1Sc4qqVu,
-  leto: $2a$10$IBHWXgq0yX3Hjh61/dnCk.vIXixiHEtTa4L781C49XeEA.y8r32gO,
-  developer: $2a$10$1AwLiD7nzhWBWS8Z9FVdKuFT7Yf7MqPQPf/al4cji1PLX4EzgaAxK
-}
+---
+mike: "$2a$10$zajeXZ3EnviHVW.7Ak6.Vu1PnDV.1a6mqhU25/qrCWR7w1Sc4qqVu"
+leto: "$2a$10$IBHWXgq0yX3Hjh61/dnCk.vIXixiHEtTa4L781C49XeEA.y8r32gO"
+developer: "$2a$10$1AwLiD7nzhWBWS8Z9FVdKuFT7Yf7MqPQPf/al4cji1PLX4EzgaAxK"
+test: "$2a$10$RxOL.YtAjKJ5KSdCjvqkBuiHc7aUCBbsSflCTts8HkOEllQkyVqPC"

@@ -65,6 +65,10 @@ def require_user_signin
   end
 end
 
+def file_type_is_supported?(file)
+  [".rb", ".txt", ".md"].include?(File.extname(file))
+end
+
 get "/" do
   pattern = File.join(data_path, "*")
   @files = Dir.glob(pattern).map { |path| File.basename(path) }
@@ -83,7 +87,7 @@ post "/create" do
   title = params[:filename].to_s
   file_content = params[:content].to_s
 
-  if !title.include?(".") || title.size == ''
+  if !file_type_is_supported?(title) || !title.include?(".") || title.size == ''
     session[:message] = "A valid file-name and type is required!"
     status 422
     erb :new_document
@@ -138,12 +142,26 @@ post "/:file_name/delete" do
   redirect "/"
 end
 
+post "/:file_name/duplicate" do
+  require_user_signin
+  file_lenth = params[:file_name].size + 1
+
+  path = File.join(data_path, params[:file_name])
+
+  File.open(path, "r") do |file|
+    File.write(path.insert(-file_lenth, "copy_"), file.read)
+  end
+
+  session[:message] = "#{params[:file_name]} has been duplicated!"
+  redirect "/"
+end
+
 get "/users/signin" do
   erb :signin
 end
 
 post "/users/signin" do
-  username = params[:username]# || ""
+  username = params[:username]
   password = params[:password]
 
   if valid_credentials?(username, password)
@@ -154,6 +172,27 @@ post "/users/signin" do
     session[:message] = "Invalid credentials!"
     status 422
     erb :signin
+  end
+end
+
+get "/users/signup" do
+  erb :signup
+end
+
+post "/users/signup" do
+  username = params[:username]
+  password = params[:password]
+
+  if username == "" || password == ""
+    session[:message] = "Please enter a username and password"
+    status 422
+    erb :signup
+  else
+    user_file = File.read("users.yml")
+    data = YAML.load(user_file)
+    data[username] = BCrypt::Password.create(password).to_s
+    File.write("users.yml", YAML.dump(data))
+    redirect "/users/signin"
   end
 end
 
