@@ -1,3 +1,7 @@
+<% if session[:message] %>
+  <p class="message"><%= session.delete(:message) %></p>
+<% end %>
+
 <form method="post" action="/<%= @file_name %>">
   <label for="content">Edit content of <%= @file_name %>:</label>
   <div>
@@ -6,3 +10,14 @@
   <button type="submit">Save Changes</button>
   <a href="/">Cancel</a>
 </form>
+
+<p><strong>File History</strong></p>
+<div>
+<% @file_history.each do |file_history| %>
+  <ul>
+    <li>
+      <a href="/data/<%= get_folder_name(file_history) %>/<%= get_file_name(file_history) %>"><%= get_file_name(file_history) %></a>
+    </li>
+  </ul>
+<% end %>
+</div>

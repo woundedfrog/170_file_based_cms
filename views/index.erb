@@ -4,6 +4,7 @@
 
 <ul>
   <% @files.each do |file| %>
+    <% next if !file.include?(".") %>
     <li>
       <a href="/<%= file %>"><%= file %></a>
       <a href="/<%= file %>/edit">edit</a>

@@ -15,6 +15,20 @@ configure do
   set :session_secret, "secret"
 end
 
+helpers do
+  def full_file_name(file_path)
+    file_path.split("/")
+  end
+
+  def get_file_name(file_path)
+    full_file_name(file_path)[-1]
+  end
+
+  def get_folder_name(file_path)
+    full_file_name(file_path)[-2]
+  end
+end
+
 def valid_credentials?(username, password)
   credentials = load_user_credentials
 
@@ -74,6 +88,18 @@ def file_type_is_supported?(file)
   [".rb", ".txt", ".md", ".jpg", ".png", ".gif"].include?(File.extname(file))
 end
 
+def edited?(path, content)
+  File.read(path) != content
+end
+
+def get_file_name_parts(file)
+    file_name = file
+    extension = File.extname(file_name) # extract file extension
+    basename = File.basename(file_name, extension) # extract file basename
+
+    [basename, extension, file]
+end
+
 get "/" do
   pattern = File.join(data_path, "*")
   @files = Dir.glob(pattern).map { |path| File.basename(path) }
@@ -105,7 +131,10 @@ post "/create" do
 end
 
 get "/:file_name" do
-  path = File.join(data_path, params[:file_name])
+
+  basename, extension, file_name = get_file_name_parts(params[:file_name])
+
+  path = File.join(data_path, file_name)
 
   if File.file?(path)
     display_file_content(path)
@@ -115,25 +144,56 @@ get "/:file_name" do
   end
 end
 
+get "/data/:folder_name/:file_name" do
+
+  basename, extension, file_name = get_file_name_parts(params[:file_name]) # FOR some reason this basename doesn't work properly here. I have to use the one below.
+  basename = params[:folder_name] # extract file basename
+
+  history_path = File.join(data_path + "/#{basename}/", file_name)
+
+  if File.file?(history_path)
+    display_file_content(history_path)
+  else
+    session[:message] = "#{params[:file_name]} doesn't exist."
+    redirect "/"
+  end
+end
+
 get "/:file_name/edit" do
   require_user_signin
 
-  path = File.join(data_path, params[:file_name])
+  basename, extension, file_name = get_file_name_parts(params[:file_name])
 
-  @file_name = params[:file_name]
+  path = File.join(data_path, file_name)
+  history_path = File.join(data_path + "/" + basename, "*")
+
+  @file_history = Dir.glob(history_path).map { |file_path| file_path }
+  @file_name = file_name
   @content = File.read(path)
+
   erb :edit
 end
 
 post "/:file_name" do
   require_user_signin
 
-  path = File.join(data_path, params[:file_name])
+  basename, extension, file_name = get_file_name_parts(params[:file_name])
 
-  File.write(path, params[:content])
+  new_path = File.join(data_path, basename) # save new directory to local var
+  source_path = new_path + extension # save (original)source directory to local var
+  version = (Time.now.to_s + "#{extension}").gsub(" ", "_") # gets timestamp of change
 
-  session[:message] = "#{params[:file_name]} has been updated!"
-  redirect "/"
+  if edited?(source_path, params[:content]) # checks if the file has been edited
+    FileUtils.mkdir_p "#{new_path}" # creates new directory for history
+    FileUtils.cp(source_path, "#{new_path}/#{version}") # copy's old(version) file to new directory
+    File.write(source_path, params[:content]) # writes changes to current main file.
+      session[:message] = "#{file_name} has been updated!"
+      redirect "/"
+  else
+    status 422
+    session[:message] = "No changes were detected"
+    redirect "/#{file_name}/edit"
+  end
 end
 
 post "/:file_name/delete" do
