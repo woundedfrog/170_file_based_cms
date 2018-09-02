@@ -4,7 +4,10 @@ require "tilt/erubis"
 require "redcarpet"
 require "yaml"
 require "bcrypt"
-
+# url attribute scarping
+require 'nokogiri'
+require 'open-uri'
+# -----
 require 'fileutils'
 
 configure do
@@ -101,15 +104,6 @@ post "/create" do
   end
 end
 
-get "/new_image" do
-  require_user_signin
-  erb :upload
-end
-
-post "/upload/image" do
-  redirect "/"
-end
-
 get "/:file_name" do
   path = File.join(data_path, params[:file_name])
 
@@ -165,6 +159,30 @@ post "/:file_name/duplicate" do
 
   session[:message] = "#{params[:file_name]} has been duplicated!"
   redirect "/"
+end
+
+get "/upload/image" do
+  require_user_signin
+  erb :upload
+end
+
+post "/upload/image" do
+  url = params[:upload]
+  doc = Nokogiri::HTML(open(url))
+  attr_tag = doc.css("img").map{ |i| i["title"] }.compact.first
+
+  if attr_tag.nil?
+    attr_tag = url.split("/").last[0..5]
+  end
+  img_name = "img_" + attr_tag.gsub(" ", "_").downcase + ".md"
+
+  link = "![#{img_name}](#{url})"
+
+  path = File.join(data_path, img_name)
+  File.write(path, link)
+
+  session[:message] = "Image #{img_name} has been successfully uploaded!"
+  redirect '/'
 end
 
 get "/users/signin" do

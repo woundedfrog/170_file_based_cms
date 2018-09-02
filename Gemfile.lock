@@ -12,9 +12,12 @@ GEM
     erubis (2.7.0)
     i18n (1.1.0)
       concurrent-ruby (~> 1.0)
+    mini_portile2 (2.3.0)
     minitest (5.11.3)
     multi_json (1.13.1)
     mustermann (1.0.3)
+    nokogiri (1.8.4)
+      mini_portile2 (~> 2.3.0)
     rack (2.0.5)
     rack-protection (2.0.3)
       rack
@@ -46,6 +49,7 @@ DEPENDENCIES
   bcrypt
   erubis
   minitest
+  nokogiri
   rack-test
   redcarpet
   sinatra
