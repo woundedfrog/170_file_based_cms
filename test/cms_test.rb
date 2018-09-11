@@ -206,6 +206,34 @@ class CMSTest < Minitest::Test
     assert_equal "You must be signed in to do that.", session[:message]
   end
 
+  def test_image_upload
+    get '/upload/image', {}, admin_session
+    assert_equal 200, last_response.status
+    assert_match /<input.+type="text"/, last_response.body
+    assert_match /<button.+type="submit"/, last_response.body
+
+    url = 'https://images.pexels.com/photos/699413/pexels-photo-699413.jpeg?cs=srgb&dl=blurred-background-close-up-country-699413.jpg&fm=jpg'
+
+    post '/upload/image', upload: url
+
+    assert_equal 302, last_response.status
+    assert_match(/image.{0,100} has been successfully uploaded/i, session[:message])
+  end
+
+  def test_valid_file_type
+
+  end
+
+  def test_create_new_document_without_filename
+    post "/create", {filename: "test"}, admin_session
+    assert_equal 422, last_response.status
+    assert_includes last_response.body, "A valid file-name and type is required!"
+  end
+
+  def test_create_duplicate_file
+
+  end
+
   def teardown
     FileUtils.rm_rf(data_path)
   end
